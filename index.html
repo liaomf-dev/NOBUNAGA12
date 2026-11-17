@@ -69,6 +69,9 @@ td.n{font-family:var(--mono);font-size:13px;color:var(--muted)}
 td.txt{font-size:13px}
 td.none{color:var(--muted)}
 td.sp{font-size:13px;font-weight:700;color:var(--accent)}
+.spb{font:inherit;color:inherit;background:none;border:1px dashed transparent;border-radius:4px;padding:1px 6px;cursor:pointer}
+.spb:hover{border-color:var(--accent);background:var(--surface)}
+.spb.on{color:var(--surface);background:var(--accent);border-color:var(--accent)}
 .g{display:inline-block;width:22px;line-height:20px;border-radius:4px;font-family:var(--mono);font-size:12px;font-weight:500}
 .gS{color:var(--g-s);background:var(--g-s-bg);font-weight:700}
 .gA{color:var(--g-a);background:var(--g-a-bg)}
@@ -101,7 +104,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     <select id="apt" aria-label="依適性篩選"><option value="">全部適性</option></select>
     <button class="reset" id="reset" type="button">重設</button>
   </div>
-  <div class="hint">第一次點擊由高到低，再點一次由低到高。能力值 ≥ 90 以粗體標示。統武智＝統率＋武勇＋知略，統武智政＝統率＋武勇＋知略＋政治。</div>
+  <div class="hint">點擊武將的固有戰法，可篩選出所有擁有該戰法的武將（再點一次取消）。第一次點擊由高到低，再點一次由低到高。能力值 ≥ 90 以粗體標示。統武智＝統率＋武勇＋知略，統武智政＝統率＋武勇＋知略＋政治。</div>
 
   <div class="tablebox">
     <table>
@@ -164,7 +167,7 @@ function cell(c,r){
     case 'total': return `<td class="total${cls}">${v}</td>`;
     case 'n': return `<td class="n${cls}">${v}</td>`;
     case 'txt': return `<td class="txt${cls}">${esc(v)}</td>`;
-    case 'sp': return v?`<td class="sp${cls}">${esc(v)}</td>`:`<td class="none${cls}">—</td>`;
+    case 'sp': return v?`<td class="sp${cls}"><button type="button" class="spb${v===$('sp').value?' on':''}" data-sp="${esc(v)}" title="篩選擁有「${esc(v)}」的武將">${esc(v)}</button></td>`:`<td class="none${cls}">—</td>`;
     case 'g': {const gr=r[10][c[5]];return `<td class="${cls.trim()}"><span class="g g${gr}">${gr}</span></td>`;}
   }
 }
@@ -197,6 +200,8 @@ function render(){
 }
 
 body.addEventListener('click',e=>{
+  const s=e.target.closest('button[data-sp]');
+  if(s){ $('sp').value = $('sp').value===s.dataset.sp ? '' : s.dataset.sp; render(); document.querySelector('.tablebox').scrollTop=0; return; }
   const b=e.target.closest('button[data-n]'); if(!b) return;
   const r=DATA[+b.dataset.n];
   open.has(r)?open.delete(r):open.add(r);
